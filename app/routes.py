@@ -1,25 +1,13 @@
-from flask import Flask, jsonify, request
-
-from app.auth import google_auth, google_auth_callback
+from flask import Flask
+import app.handler as handler
 
 
 def init(app: Flask):
-    def index():
-        return jsonify({"message": "Hello world!"})
+    app.route("/")(handler.index)
+    app.errorhandler(404)(handler.unsupported)
+    app.errorhandler(405)(handler.unsupported)
 
-    def unsupported(_):
-        return jsonify({"message": "Unsupported request"}), 400
+    app.route("/auth/google", methods=["POST"])(handler.google_auth)
+    app.route("/auth/google/callback")(handler.google_auth_callback)
 
-    def google_auth_handler():
-        return jsonify(google_auth())
-
-    def google_auth_callback_handler():
-        code = f"{request.args.get('code')}"
-        return jsonify(google_auth_callback(code))
-
-    app.route("/")(index)
-    app.errorhandler(404)(unsupported)
-    app.errorhandler(405)(unsupported)
-
-    app.route("/auth/google", methods=["POST"])(google_auth_handler)
-    app.route("/auth/google/callback")(google_auth_callback_handler)
+    app.route("/user/me", methods=["GET"])(handler.get_current_user)
