@@ -62,23 +62,23 @@ def get_spot(id: int):
 def create_spot(name: str, location: str, description: str, price_rate: Number, status: str):
     file_data = read_file_data(SPOTS_FILE_DATA)
 
-    spots = file_data.get("records") or []
-    increment = file_data.get("increment") or 0
-
-    spots.append({
-        "id": increment + 1,
-        "name": name,
-        "price_rate": price_rate,
-        "status": status,
-        "location": location,
-        "description": description,
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat(),
-    })
+    increment = (file_data.get("increment") or 0) + 1
 
     rewrite_file_data(SPOTS_FILE_DATA, {
-        "increment": increment + 1,
-        "records": spots,
+        "increment": increment,
+        "records": [
+            *(file_data.get("records") or []),
+            {
+                "id": increment,
+                "name": name,
+                "price_rate": price_rate,
+                "status": status,
+                "location": location,
+                "description": description,
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
+            }
+        ],
     })
 
     return {"success": True, "message": "Parking spot created"}
@@ -104,7 +104,6 @@ def update_spot(
             spot["price_rate"] = price_rate or spot["price_rate"]
             spot["status"] = status or spot["status"]
             spot["updated_at"] = datetime.now().isoformat()
-
             break
 
     rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": spots})
@@ -120,7 +119,6 @@ def delete_spot(id: int):
     for spot in spots:
         if spot["id"] == id:
             spots.remove(spot)
-
             break
 
     rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": spots})

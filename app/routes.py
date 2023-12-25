@@ -1,11 +1,12 @@
 from flask import Flask
 
 import app.handlers as handlers
-from app.middleware import protected_route
+from app.middleware import admin_user_route, protected_route
 
 
 def init(app: Flask):
     app.before_request(protected_route)
+    app.before_request(admin_user_route)
 
     app.route("/")(handlers.index)
     app.errorhandler(400)(handlers.unsupported)
@@ -14,8 +15,11 @@ def init(app: Flask):
     app.errorhandler(415)(handlers.unsupported)
 
     app.route("/auth/google", methods=["POST"])(handlers.auth.google_auth)
+    app.route(
+        rule="/auth/google/callback",
+        methods=["POST", "GET"])(handlers.auth.google_auth_callback)
 
-    app.route("/auth/google/callback")(handlers.auth.google_auth_callback)
+    app.route("/auth/logout", methods=["POST"])(handlers.auth.logout)
 
     app.route("/users/me", methods=["GET"])(handlers.users.get_current_user)
 

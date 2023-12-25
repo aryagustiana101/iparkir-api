@@ -51,15 +51,17 @@ def validate_fields(data: dict[str, Any], schema: dict[str, dict[str, Any]]):
 
 
 def binary_search(data: list[Any], search: Any, key_function: Callable = lambda x: x):
+    sorted_data = sorted(data, key=key_function)
+
     left = 0
-    right = len(data) - 1
+    right = len(sorted_data) - 1
 
     while left <= right:
         mid = (left + right) // 2
-        mid_key = key_function(data[mid])
+        mid_key = key_function(sorted_data[mid])
 
         if mid_key == search:
-            return data[mid]
+            return sorted_data[mid]
 
         if mid_key < search:
             left = mid + 1
