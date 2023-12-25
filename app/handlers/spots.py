@@ -5,11 +5,11 @@ from app.services import spots
 from app.utils import validate_fields
 
 schema = {
-    "name": {"type": str, "message": "Name is required and must be string"},
-    "status": {"type": str, "message": "Status is required and must be string"},
-    "location": {"type": str, "message": "Location is required and must be string"},
-    "description": {"type": str, "message": "Description is required and must be string"},
-    "price_rate": {"type": Number, "message": "Price rate is required and must be number"},
+    "name": {"type": str, "failed_message": "Name is required and must be string"},
+    "status": {"type": str, "failed_message": "Status is required and must be string"},
+    "location": {"type": str, "failed_message": "Location is required and must be string"},
+    "description": {"type": str, "failed_message": "Description is required and must be string"},
+    "price_rate": {"type": Number, "failed_message": "Price rate is required and must be number"},
 }
 
 
@@ -66,6 +66,9 @@ def create_spot():
 
 
 def update_spot(id: str):
+    if not id.isnumeric():
+        return jsonify({"success": False, "message": "Invalid parking spot id"}), 400
+
     spot = spots.get_spot(int(id)).get("data")
 
     if not spot:
@@ -75,10 +78,10 @@ def update_spot(id: str):
 
     data = {
         "name": body.get("name") or spot.get("name"),
+        "status": body.get("status") or spot.get("status"),
         "location": body.get("location") or spot.get("location"),
         "price_rate": body.get("price_rate") or spot.get("price_rate"),
         "description": body.get("description") or spot.get("description"),
-        "status": body.get("status") or spot.get("status"),
     }
 
     validation_result = validate_fields(schema=schema, data=data)

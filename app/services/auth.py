@@ -51,14 +51,23 @@ def google_auth_callback(code: str):
         print(user_info_response.json())
         return {"success": False, "message": "Failed to fetch user information"}
 
+    user_info = user_info_response.json()
+
     token = jwt.encode(
         algorithm="HS256",
         key=constants.SECRET_KEY,
-        payload=user_info_response.json(),
+        payload={"id": user_info["id"]},
     )
 
-    file_data = read_file_data(constants.AUTH_FILE_DATA)
+    user = users.get_user(id=user_info["id"]).get("data")
 
+    if not user:
+        users.create_user(data=user_info)
+
+    if user:
+        users.update_user(id=user_info["id"], data=user_info)
+
+    file_data = read_file_data(constants.AUTH_FILE_DATA)
     increment = (file_data.get("increment") or 0) + 1
 
     rewrite_file_data(constants.AUTH_FILE_DATA, {
@@ -96,20 +105,27 @@ def get_authenticated_user(authorization: str | None):
     if not authorization:
         return {"success": False, "message": "Authorization header not found"}
 
-    token = authorization.split(" ")[1]
-
     file_data = read_file_data(constants.AUTH_FILE_DATA)
 
-    result = binary_search(
-        search=token,
+    record = binary_search(
+        search=authorization.split(" ")[1],
         key_function=lambda x: x["token"],
         data=(file_data.get("records") or []),
     )
 
-    if not result:
-        return {"success": False, "message": "Token not found"}
+    if not record:
+        return {"success": False, "message": "Invalid token"}
 
-    return users.get_current_user(token=token)
+    try:
+        decoded = jwt.decode(
+            jwt=record["token"],
+            algorithms=["HS256"],
+            key=constants.SECRET_KEY,
+        )
+
+        return users.get_user(id=decoded["id"])
+    except:
+        return {"success": False, "message": "Invalid token"}
 
 
 def check_admin_user(id: str):

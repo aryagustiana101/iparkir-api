@@ -1,19 +1,24 @@
+from app.services import users
 from app.constants import ADMIN_USERS_FILE_DATA, CLI_PIN
-from app.utils import read_file_data, rewrite_file_data
+from app.utils import binary_search, read_file_data, rewrite_file_data
 
 
 def get_admin_users():
     file_data = read_file_data(ADMIN_USERS_FILE_DATA)
 
-    users = file_data.get("records") or []
+    admin_users = file_data.get("records") or []
 
-    if len(users) == 0:
+    if len(admin_users) == 0:
         print("\nNo admin users found")
         return None
 
-    print("")
-    for user in users:
-        print(f"User ID: {user["user_id"]}")
+    for admin_user in admin_users:
+        user = users.get_user(admin_user["user_id"]).get("data")
+
+        if user:
+            print(f"\nID: {user["user_id"]}")
+            print(f"Name: {user["name"]}")
+            print(f"Email: {user["email"]}")
 
     return None
 
@@ -22,6 +27,16 @@ def add_admin_users():
     file_data = read_file_data(ADMIN_USERS_FILE_DATA)
 
     id = input("\nEnter ID of the user to add as admin: ")
+
+    admin_user = binary_search(
+        search=id,
+        key_function=lambda x: x["user_id"],
+        data=file_data.get("records") or [],
+    )
+
+    if admin_user:
+        print("\nUser is already an admin")
+        return None
 
     increment = (file_data.get("increment") or 0) + 1
 
@@ -46,7 +61,7 @@ def remove_admin_users():
         **file_data,
         "records": [
             user for user in (file_data.get("records") or [])
-            if user["id"] != id
+            if user["user_id"] != id
         ],
     })
 

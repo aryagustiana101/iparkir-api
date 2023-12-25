@@ -1,7 +1,8 @@
 from datetime import datetime
 from numbers import Number
 
-from app.constants import SPOTS_FILE_DATA
+from app.stripe import stripe
+from app.constants import APP_URL, SPOTS_FILE_DATA
 from app.utils import binary_search, read_file_data, rewrite_file_data
 
 
@@ -96,17 +97,20 @@ def update_spot(
 
     spots = file_data.get("records") or []
 
-    for spot in spots:
-        if spot["id"] == id:
-            spot["name"] = name or spot["name"]
-            spot["location"] = location or spot["location"]
-            spot["description"] = description or spot["description"]
-            spot["price_rate"] = price_rate or spot["price_rate"]
-            spot["status"] = status or spot["status"]
-            spot["updated_at"] = datetime.now().isoformat()
-            break
-
-    rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": spots})
+    rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": [
+        {
+            **spot,
+            "name": name or spot["name"],
+            "status": status or spot["status"],
+            "location": location or spot["location"],
+            "description": description or spot["description"],
+            "price_rate": price_rate or spot["price_rate"],
+            "updated_at": datetime.now().isoformat(),
+        }
+        if spot["id"] == id else
+        spot
+        for spot in spots
+    ]})
 
     return {"success": True, "message": "Parking spot updated"}
 
@@ -114,13 +118,34 @@ def update_spot(
 def delete_spot(id: int):
     file_data = read_file_data(SPOTS_FILE_DATA)
 
-    spots = file_data.get("records") or []
-
-    for spot in spots:
-        if spot["id"] == id:
-            spots.remove(spot)
-            break
-
-    rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": spots})
+    rewrite_file_data(SPOTS_FILE_DATA, {**file_data, "records": [
+        spot for spot in (file_data.get("records") or [])
+        if spot["id"] != id
+    ]})
 
     return {"success": True, "message": "Parking spot deleted"}
+
+
+def reserve_spot(spot_id: int, user_id: int):
+    spot = get_spot(spot_id).get("data")
+
+    if not spot:
+        return {"success": False, "message": "Parking spot not found"}
+
+    session = stripe.checkout.Session.create(
+        mode="payment",
+        cancel_url=f"{APP_URL}",
+        success_url=f"{APP_URL}",
+        line_items=[{
+            "quantity": 1,
+            "price_data": {
+                "currency": "idr",
+                "unit_amount": spot.get("price_rate") * 100,
+                "product_data": {
+                    "name": f"Reserve Parking Spot -  {spot.get('name')}",
+                },
+            },
+        }],
+    )
+
+    return {"success": True, "redirect_url": session.url}

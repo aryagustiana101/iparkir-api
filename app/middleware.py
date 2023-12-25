@@ -10,6 +10,7 @@ def protected_route():
         "/users/me": ["GET"],
         "/auth/logout": ["POST"],
         "/spots": ["GET", "POST"],
+        f"/spots/{view_args.get("id") or "<id>"}/reserve": ["POST"],
         f"/spots/{view_args.get("id") or "<id>"}": ["GET", "PUT", "PATCH", "DELETE"],
     }
 
@@ -37,9 +38,9 @@ def admin_user_route():
 
         user = get_authenticated_user(
             request.headers.get("Authorization")
-        ).get("user")
+        ).get("data")
 
-        if user is None or (not check_admin_user(user.get("id"))):
+        if user is None or (not check_admin_user(user.get("user_id"))):
             return jsonify({
                 "success": False,
                 "message": "You are not authorized to perform this action",

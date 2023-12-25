@@ -2,10 +2,7 @@ import os
 import json
 from typing import Any, Callable
 
-DEFAULT_FILE_DATA_FORMAT = {
-    "increment": 0,
-    "records": []
-}
+from app.constants import DEFAULT_FILE_DATA_FORMAT
 
 
 def create_file_data(path: str, data: dict[str, Any] = DEFAULT_FILE_DATA_FORMAT):
@@ -42,7 +39,7 @@ def validate_fields(data: dict[str, Any], schema: dict[str, dict[str, Any]]):
             required=required if not required is None else True
         ):
             result["messages"].append(
-                rules.get("message") or f"Invalid field {field}"
+                rules.get("failed_message") or f"Invalid field {field}"
             )
 
     result["success"] = len(result["messages"]) == 0
