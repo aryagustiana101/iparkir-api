@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from typing import Any, Callable
 
-from app.constants import DEFAULT_FILE_DATA_FORMAT
+from app.libs.constants import DEFAULT_FILE_DATA_FORMAT
 
 
 def create_file_data(path: str, data: dict[str, Any] = DEFAULT_FILE_DATA_FORMAT):

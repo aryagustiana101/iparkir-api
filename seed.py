@@ -2,7 +2,7 @@ import os
 from faker import Faker
 
 from app.services import spots
-from app.constants import SPOTS_FILE_DATA
+from app.libs.constants import SPOTS_FILE_DATA
 
 fake = Faker(locale="id_ID")
 

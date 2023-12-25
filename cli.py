@@ -1,6 +1,6 @@
 from app.services import users
-from app.constants import ADMIN_USERS_FILE_DATA, CLI_PIN
-from app.utils import binary_search, read_file_data, rewrite_file_data
+from app.libs.constants import ADMIN_USERS_FILE_DATA, CLI_PIN
+from app.libs.utils import binary_search, read_file_data, rewrite_file_data
 
 
 def get_admin_users():

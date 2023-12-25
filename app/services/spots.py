@@ -1,10 +1,10 @@
 from numbers import Number
 from datetime import datetime
 
-from app.stripe import stripe
+from app.libs.stripe import stripe
 from app.services import reservations, users
-from app.constants import APP_URL, CURRENCY, SPOTS_FILE_DATA
-from app.utils import binary_search, read_file_data, rewrite_file_data
+from app.libs.constants import APP_URL, CURRENCY, SPOTS_FILE_DATA
+from app.libs.utils import binary_search, read_file_data, rewrite_file_data
 
 
 def get_spots(search: str | None = None, page: int = 1, page_size: int = 10, status: str | None = None):

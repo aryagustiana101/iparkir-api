@@ -1,4 +1,6 @@
-from app import app, routes, constants
+from app import app
+from app.configs import routes
+from app.libs import constants
 
 routes.init(app)
 

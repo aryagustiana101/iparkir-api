@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import jsonify, request
 
 from app.services import auth, spots
-from app.utils import parse_iso_datetime, validate_fields
+from app.libs.utils import parse_iso_datetime, validate_fields
 
 schema = {
     "name": {"type": str, "failed_message": "Name is required and must be string"},

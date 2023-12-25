@@ -3,9 +3,9 @@ import requests
 import urllib.parse
 from datetime import datetime
 
-from app import constants
+from app.libs import constants
 from app.services import users
-from app.utils import binary_search, read_file_data, rewrite_file_data
+from app.libs.utils import binary_search, read_file_data, rewrite_file_data
 
 
 def google_auth():

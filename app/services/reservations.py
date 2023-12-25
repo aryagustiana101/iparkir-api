@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Any
 
-from app.constants import RESERVATIONS_FILE_DATA
-from app.handlers import reservations
-from app.utils import binary_search, read_file_data, rewrite_file_data
+from app.libs.constants import RESERVATIONS_FILE_DATA
+from app.libs.utils import binary_search, read_file_data, rewrite_file_data
 
 
 def get_reservations(

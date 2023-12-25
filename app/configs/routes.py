@@ -1,7 +1,7 @@
 from flask import Flask
 
 import app.handlers as handlers
-from app.middleware import admin_user_route, protected_route
+from app.libs.middleware import admin_user_route, protected_route
 
 
 def init(app: Flask):

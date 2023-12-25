@@ -1,6 +1,6 @@
 from flask import jsonify, request
 
-from app.utils import validate_fields
+from app.libs.utils import validate_fields
 from app.services import auth, reservations
 
 

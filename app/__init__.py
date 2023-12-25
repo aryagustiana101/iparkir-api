@@ -1,6 +1,6 @@
 from flask import Flask
 
-from app.constants import SECRET_KEY
+from app.libs.constants import SECRET_KEY
 
 app = Flask(__name__)
 
