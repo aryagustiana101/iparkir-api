@@ -1,7 +1,9 @@
 import jwt
 import requests
 import urllib.parse
-import app.constants as constants
+
+from app import constants
+from app.services import users
 
 
 def google_auth():
@@ -54,3 +56,10 @@ def google_auth_callback(code: str):
     )
 
     return {"success": True, "token": token}
+
+
+def get_authenticated_user(authorization: str | None):
+    if not authorization:
+        return {"success": False, "message": "Authorization header not found"}
+
+    return users.get_current_user(token=authorization.split(" ")[1])

@@ -1,4 +1,5 @@
 import jwt
+
 from app.constants import SECRET_KEY
 
 

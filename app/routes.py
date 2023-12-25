@@ -1,13 +1,30 @@
 from flask import Flask
-import app.handler as handler
+
+import app.handlers as handlers
+from app.middleware import protected_route
 
 
 def init(app: Flask):
-    app.route("/")(handler.index)
-    app.errorhandler(404)(handler.unsupported)
-    app.errorhandler(405)(handler.unsupported)
+    app.before_request(protected_route)
 
-    app.route("/auth/google", methods=["POST"])(handler.google_auth)
-    app.route("/auth/google/callback")(handler.google_auth_callback)
+    app.route("/")(handlers.index)
+    app.errorhandler(400)(handlers.unsupported)
+    app.errorhandler(404)(handlers.unsupported)
+    app.errorhandler(405)(handlers.unsupported)
+    app.errorhandler(415)(handlers.unsupported)
 
-    app.route("/user/me", methods=["GET"])(handler.get_current_user)
+    app.route("/auth/google", methods=["POST"])(handlers.auth.google_auth)
+
+    app.route("/auth/google/callback")(handlers.auth.google_auth_callback)
+
+    app.route("/users/me", methods=["GET"])(handlers.users.get_current_user)
+
+    app.route("/spots", methods=["GET"])(handlers.spots.get_spots)
+    app.route("/spots/<id>", methods=["GET"])(handlers.spots.get_spot)
+    app.route("/spots", methods=["POST"])(handlers.spots.create_spot)
+    app.route(
+        rule="/spots/<id>",
+        methods=["PUT", "PATCH"])(handlers.spots.update_spot)
+    app.route(
+        rule="/spots/<id>",
+        methods=["DELETE"])(handlers.spots.delete_spot)
