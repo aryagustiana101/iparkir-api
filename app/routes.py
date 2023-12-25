@@ -32,3 +32,18 @@ def init(app: Flask):
     app.route(
         rule="/spots/<id>",
         methods=["DELETE"])(handlers.spots.delete_spot)
+    app.route(
+        rule="/spots/<id>/reserve",
+        methods=["POST"])(handlers.spots.reserve_spot)
+
+    app.route(
+        methods=["GET"],
+        rule="/reservations")(handlers.reservations.get_reservations)
+
+    app.route(
+        methods=["GET"],
+        rule="/reservations/<id>")(handlers.reservations.get_reservation)
+
+    app.route(
+        methods=["PUT", "PATCH"],
+        rule="/reservations/<id>")(handlers.reservations.update_reservation)

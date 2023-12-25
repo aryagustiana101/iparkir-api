@@ -1,8 +1,9 @@
 from numbers import Number
+from datetime import datetime
 from flask import jsonify, request
 
-from app.services import spots
-from app.utils import validate_fields
+from app.services import auth, spots
+from app.utils import parse_iso_datetime, validate_fields
 
 schema = {
     "name": {"type": str, "failed_message": "Name is required and must be string"},
@@ -113,3 +114,68 @@ def delete_spot(id: str):
     result = spots.delete_spot(int(id))
 
     return jsonify(result), 200 if result.get("success") else 400
+
+
+def reserve_spot(id: str):
+    if not id.isnumeric():
+        return jsonify({"success": False, "message": "Invalid parking spot id"}), 400
+
+    user = auth.get_authenticated_user(
+        request.headers.get("Authorization")
+    ).get("data")
+
+    spot = spots.get_spot(int(id)).get("data")
+
+    if not spot or not user:
+        return jsonify({
+            "success": False,
+            "message":  "Parking spot not found" if not spot else "User not found",
+        }), 404
+
+    if spot.get("status") != "available":
+        return jsonify({"success": False, "message":  "Parking spot is not available"}), 400
+
+    body = request.get_json()
+
+    data = {
+        "spot_id": int(id),
+        "user_id": user.get("user_id"),
+        "end": parse_iso_datetime(body.get("end")),
+        "start": parse_iso_datetime(body.get("start")),
+    }
+
+    validation_result = validate_fields(data=data, schema={
+        "user_id": {"type": str, "failed_message": "User ID is required and must be string"},
+        "spot_id": {"type": int, "failed_message": "Spot ID is required and must be number"},
+        "end": {
+            "type": datetime,
+            "failed_message": "End date time is required and must be date with ISO format"
+        },
+        "start": {
+            "type": datetime,
+            "failed_message": "Start date time is required and must be date with ISO format"
+        },
+    })
+
+    if not validation_result.get("success"):
+        return jsonify(validation_result), 400
+
+    if data["end"] <= data["start"]:
+        return jsonify(
+            {"success": False, "message": "End date time must be greater than start date time"}
+        )
+
+    current_time = datetime.now()
+
+    if data["start"] < current_time or data["end"] < current_time:
+        return {
+            "success": False,
+            "message":
+                "Start date time must not be in the past"
+                if data["start"] < current_time else
+                "End date time must not be in the past",
+        }
+
+    result = spots.reserve_spot(**data)
+
+    return result, 200 if result.get("success") else 400

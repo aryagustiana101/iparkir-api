@@ -1,5 +1,6 @@
 import os
 import json
+from datetime import datetime
 from typing import Any, Callable
 
 from app.constants import DEFAULT_FILE_DATA_FORMAT
@@ -66,3 +67,10 @@ def binary_search(data: list[Any], search: Any, key_function: Callable = lambda 
             right = mid - 1
 
     return None
+
+
+def parse_iso_datetime(value: str):
+    try:
+        return datetime.fromisoformat(value)
+    except:
+        return None

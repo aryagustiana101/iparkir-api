@@ -1,8 +1,9 @@
-from datetime import datetime
 from numbers import Number
+from datetime import datetime
 
 from app.stripe import stripe
-from app.constants import APP_URL, SPOTS_FILE_DATA
+from app.services import reservations, users
+from app.constants import APP_URL, CURRENCY, SPOTS_FILE_DATA
 from app.utils import binary_search, read_file_data, rewrite_file_data
 
 
@@ -25,10 +26,10 @@ def get_spots(search: str | None = None, page: int = 1, page_size: int = 10, sta
         filtered_spots if not status else \
         list(filter(lambda x: x["status"] == status, filtered_spots))
 
-    start_index = (page - 1) * page_size
-    end_index = start_index + page_size
+    start = (page - 1) * page_size
+    end = start + page_size
 
-    paginated_spots = filtered_spots[start_index:end_index]
+    paginated_spots = filtered_spots[start:end]
 
     return {
         "success": True,
@@ -87,11 +88,11 @@ def create_spot(name: str, location: str, description: str, price_rate: Number, 
 
 def update_spot(
     id: int,
-    name: str | None,
-    status: str | None,
-    location: str | None,
-    description: str | None,
-    price_rate: Number | None,
+    name: str | None = None,
+    status: str | None = None,
+    location: str | None = None,
+    description: str | None = None,
+    price_rate: Number | None = None,
 ):
     file_data = read_file_data(SPOTS_FILE_DATA)
 
@@ -126,26 +127,77 @@ def delete_spot(id: int):
     return {"success": True, "message": "Parking spot deleted"}
 
 
-def reserve_spot(spot_id: int, user_id: int):
+def reserve_spot(spot_id: int, user_id: str, start: datetime, end: datetime):
     spot = get_spot(spot_id).get("data")
+    user = users.get_user(user_id).get("data")
 
-    if not spot:
-        return {"success": False, "message": "Parking spot not found"}
+    if not spot or not user:
+        return {
+            "success": False,
+            "message": "Parking spot not found" if not spot else "User not found",
+        }
 
-    session = stripe.checkout.Session.create(
-        mode="payment",
-        cancel_url=f"{APP_URL}",
-        success_url=f"{APP_URL}",
-        line_items=[{
-            "quantity": 1,
-            "price_data": {
-                "currency": "idr",
-                "unit_amount": spot.get("price_rate") * 100,
-                "product_data": {
-                    "name": f"Reserve Parking Spot -  {spot.get('name')}",
+    if spot.get("status") != "available":
+        return {"success": False, "message": "Parking spot is not available"}
+
+    if end <= start:
+        return {"success": False, "message": "End date time must be greater than start date time"}
+
+    current_time = datetime.now()
+
+    if start < current_time or end < current_time:
+        return {
+            "success": False,
+            "message":
+                "Start date time must not be in the past"
+                if start < current_time else
+                "End date time must not be in the past",
+        }
+
+    price_rate = spot.get("price_rate")
+    hours = (end - start).total_seconds() / 3600
+    total_price = hours * price_rate
+
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            cancel_url=f"{APP_URL}",
+            success_url=f"{APP_URL}",
+            line_items=[{
+                "quantity": 1,
+                "price_data": {
+                    "currency": CURRENCY.lower(),
+                    "unit_amount": int(total_price * 100),
+                    "product_data": {
+                        "name": f"Parking Spot Reservation - {spot.get('name')}",
+                    },
                 },
-            },
-        }],
-    )
+            }],
+        )
 
-    return {"success": True, "redirect_url": session.url}
+        result = reservations.create_reservation({
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "status": "pending",
+            "price_data": {
+                "hours": hours,
+                "rate": price_rate,
+                "total": total_price,
+                "currency": CURRENCY,
+            },
+            "payment": {
+                "id": session.id,
+                "url": session.url,
+                "status": session.payment_status,
+                "expires": datetime.utcfromtimestamp(int(session.expires_at)).isoformat(),
+            },
+            "spot": spot,
+            "user": user,
+        })
+
+        update_spot(id=spot_id, status="reserved")
+
+        return result
+    except Exception as e:
+        print(e)
+        return {"success": False, "message": "Failed to create reservation"}

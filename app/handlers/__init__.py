@@ -3,6 +3,7 @@ from flask import jsonify
 import app.handlers.auth as auth
 import app.handlers.spots as spots
 import app.handlers.users as users
+import app.handlers.reservations as reservations
 
 
 def index():
