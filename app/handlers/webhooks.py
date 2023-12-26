@@ -54,7 +54,7 @@ def stripe_webhook():
             print(session)
 
         if not reservation:
-            print(f"Reservation not found for payment id {session['id']}")
+            print(f"Reservation not found for payment id {session["id"]}")
     else:
         print(f"Unhandled event type {event["type"]}")
 

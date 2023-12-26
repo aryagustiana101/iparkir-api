@@ -169,7 +169,7 @@ def reserve_spot(spot_id: int, user_id: str, start: datetime, end: datetime):
                     "currency": CURRENCY.lower(),
                     "unit_amount": int(total_price * 100),
                     "product_data": {
-                        "name": f"Parking Spot Reservation - {spot.get('name')}",
+                        "name": f"Parking Spot Reservation - {spot.get("name")}",
                     },
                 },
             }],

@@ -19,16 +19,16 @@ def get_analytics():
 
     if reservations_df.size > 0:
         average_reservation_duration = np.mean(
-            (pd.to_datetime(reservations_df['end']) - pd.to_datetime(
-                reservations_df['start'])).dt.total_seconds() / 3600
+            (pd.to_datetime(reservations_df["end"]) - pd.to_datetime(
+                reservations_df["start"])).dt.total_seconds() / 3600
         )
 
     highest_price_rate_spot = None
     lowest_price_rate_spot = None
 
     if spots_df.size > 0:
-        highest_price_rate_spot = spots_df.loc[spots_df['price_rate'].idxmax()]
-        lowest_price_rate_spot = spots_df.loc[spots_df['price_rate'].idxmin()]
+        highest_price_rate_spot = spots_df.loc[spots_df["price_rate"].idxmax()]
+        lowest_price_rate_spot = spots_df.loc[spots_df["price_rate"].idxmin()]
 
     return {
         "success": True,
@@ -41,9 +41,9 @@ def get_analytics():
                     "highest_price_rate_spot": None
                     if highest_price_rate_spot is None
                     else {
-                        "id": int(highest_price_rate_spot['id']),
-                        "name": highest_price_rate_spot['name'],
-                        "price_rate": int(highest_price_rate_spot['price_rate']),
+                        "id": int(highest_price_rate_spot["id"]),
+                        "name": highest_price_rate_spot["name"],
+                        "price_rate": int(highest_price_rate_spot["price_rate"]),
                     }
                 }
             ),
@@ -52,9 +52,9 @@ def get_analytics():
                     "lowest_price_rate_spot": None
                     if lowest_price_rate_spot is None
                     else {
-                        "id": int(lowest_price_rate_spot['id']),
-                        "name": lowest_price_rate_spot['name'],
-                        "price_rate": int(lowest_price_rate_spot['price_rate']),
+                        "id": int(lowest_price_rate_spot["id"]),
+                        "name": lowest_price_rate_spot["name"],
+                        "price_rate": int(lowest_price_rate_spot["price_rate"]),
                     }
                 }
             ),
