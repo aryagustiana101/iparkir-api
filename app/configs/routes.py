@@ -47,3 +47,7 @@ def init(app: Flask):
     app.route(
         methods=["PUT", "PATCH"],
         rule="/reservations/<id>")(handlers.reservations.update_reservation)
+
+    app.route(
+        methods=["POST"],
+        rule="/webhooks/stripe")(handlers.webhooks.stripe_webhook)

@@ -45,13 +45,13 @@ def get_reservations(
     }
 
 
-def get_reservation(id: int, user_id: str, is_admin_user: bool = False):
+def get_reservation(id: int, user_id: str, is_admin_user: bool = False, by_payment_id: bool = False):
     file_data = read_file_data(RESERVATIONS_FILE_DATA)
 
     reservation = binary_search(
         search=id,
-        key_function=lambda x: x["id"],
         data=file_data.get("records") or [],
+        key_function=lambda x: x["id"] if not by_payment_id else x["payment"]["id"],
     )
 
     success = \
@@ -85,7 +85,7 @@ def create_reservation(data: dict[str, Any]):
     return {"success": True, "message": "Reservation created", "data": reservation}
 
 
-def update_reservation(id: int, status: str):
+def update_reservation(id: int, status: str | None = None, payment: dict[str, Any] | None = None):
     file_data = read_file_data(RESERVATIONS_FILE_DATA)
 
     reservations = file_data.get("records") or []
@@ -95,7 +95,8 @@ def update_reservation(id: int, status: str):
         "records": [
             {
                 **reservation,
-                "status": status,
+                "status":  status or reservation["status"],
+                "payment": payment or reservation["payment"],
                 "updated_at": datetime.now().isoformat(),
             }
             if reservation["id"] == id else

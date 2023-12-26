@@ -190,6 +190,7 @@ def reserve_spot(spot_id: int, user_id: str, start: datetime, end: datetime):
                 "url": session.url,
                 "status": session.payment_status,
                 "expires": datetime.utcfromtimestamp(int(session.expires_at)).isoformat(),
+                "paid_at": None,
             },
             "spot": spot,
             "user": user,
