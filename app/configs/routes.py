@@ -51,3 +51,5 @@ def init(app: Flask):
     app.route(
         methods=["POST"],
         rule="/webhooks/stripe")(handlers.webhooks.stripe_webhook)
+
+    app.route("/analytics", methods=["GET"],)(handlers.analytics.get_analytics)

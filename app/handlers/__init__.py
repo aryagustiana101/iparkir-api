@@ -4,6 +4,7 @@ import app.handlers.auth as auth
 import app.handlers.spots as spots
 import app.handlers.users as users
 import app.handlers.webhooks as webhooks
+import app.handlers.analytics as analytics
 import app.handlers.reservations as reservations
 
 

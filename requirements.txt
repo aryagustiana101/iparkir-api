@@ -1,5 +1,7 @@
 Faker==21.0.0
 Flask==3.0.0
+numpy==1.26.2
+pandas==2.1.4
 PyJWT==2.8.0
 python-dotenv==1.0.0
 requests==2.31.0

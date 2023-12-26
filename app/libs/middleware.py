@@ -14,6 +14,7 @@ def protected_route():
         f"/spots/{view_args.get("id") or "<id>"}": ["GET", "PUT", "PATCH", "DELETE"],
         "/reservations": ["GET"],
         f"/reservations/{view_args.get("id") or "<id>"}": ["GET", "PUT", "PATCH"],
+        "/analytics": ["GET"],
     }
 
     if \
@@ -31,6 +32,7 @@ def admin_user_route():
 
     protected_routes = {
         "/spots": ["POST"],
+        "/analytics": ["GET"],
         f"/reservations/{view_args.get("id") or "<id>"}": ["PUT", "PATCH"],
         f"/spots/{view_args.get("id") or "<id>"}": ["PUT", "PATCH", "DELETE"],
     }
