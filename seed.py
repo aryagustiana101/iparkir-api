@@ -32,8 +32,8 @@ def main():
             )
 
         print(f"\nSuccessfully created {length} fake parking spots")
-    except:
-        return None
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":

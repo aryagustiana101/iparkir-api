@@ -49,7 +49,7 @@ def validate_fields(data: dict[str, Any], schema: dict[str, dict[str, Any]]):
 
 
 def binary_search(data: list[Any], search: Any, key_function: Callable = lambda x: x):
-    sorted_data = sorted(data, key=key_function)
+    sorted_data = bubble_sort(data, key_function)
 
     left = 0
     right = len(sorted_data) - 1
@@ -72,5 +72,23 @@ def binary_search(data: list[Any], search: Any, key_function: Callable = lambda 
 def parse_iso_datetime(value: str):
     try:
         return datetime.fromisoformat(value)
-    except:
+    except Exception as e:
+        print(e)
         return None
+
+
+def bubble_sort(data: list[Any], key_function: Callable = lambda x: x):
+    n = len(data)
+
+    for i in range(n):
+        is_sorted = True
+
+        for j in range(n - i - 1):
+            if key_function(data[j]) > key_function(data[j + 1]):
+                data[j], data[j + 1] = data[j + 1], data[j]
+                is_sorted = False
+
+        if is_sorted:
+            break
+
+    return data

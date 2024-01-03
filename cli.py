@@ -26,10 +26,10 @@ def get_admin_users():
 def add_admin_users():
     file_data = read_file_data(ADMIN_USERS_FILE_DATA)
 
-    id = input("\nEnter ID of the user to add as admin: ")
+    user_id = input("\nEnter ID of the user to add as admin: ")
 
     admin_user = binary_search(
-        search=id,
+        search=user_id,
         key_function=lambda x: x["user_id"],
         data=file_data.get("records") or [],
     )
@@ -45,7 +45,7 @@ def add_admin_users():
         "increment": increment,
         "records": [
             *(file_data.get("records") or []),
-            {"id": increment, "user_id": id}
+            {"id": increment, "user_id": user_id}
         ],
     })
 
@@ -55,17 +55,15 @@ def add_admin_users():
 def remove_admin_users():
     file_data = read_file_data(ADMIN_USERS_FILE_DATA)
 
-    id = input("\nEnter ID of the user to remove as admin: ")
+    user_id = input("\nEnter ID of the user to remove as admin: ")
 
     rewrite_file_data(ADMIN_USERS_FILE_DATA, {
         **file_data,
         "records": [
             user for user in (file_data.get("records") or [])
-            if user["user_id"] != id
+            if user["user_id"] != user_id
         ],
     })
-
-    return None
 
 
 def main():
@@ -100,8 +98,8 @@ def main():
                 break
             else:
                 print("\nInvalid choice. Please enter a valid option.")
-    except:
-        return None
+    except Exception as e:
+        print(e)
 
 
 if __name__ == "__main__":
